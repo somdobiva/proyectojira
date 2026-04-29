@@ -17,6 +17,17 @@ AMARILLO = (255, 255, 0)
 BLANCO = (255, 255, 255)
 ROJO = (255, 0, 0)
 
+# Vidas
+vidas = 3
+
+# Posiciones iniciales
+pos_inicial_jugador = [1, 1]
+pos_inicial_fantasmas = [
+    [3, 5],
+    [3, 6],
+    [2, 5]
+
+
 # Pantalla
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Pac-Man mejorado")
@@ -143,3 +154,6 @@ while True:
         print("¡Game Over!")
         pygame.quit()
         sys.exit()
+
+    dibujar()
+    clock.tick(FPS)
