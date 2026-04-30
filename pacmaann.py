@@ -20,31 +20,33 @@ ROJO = (255, 0, 0)
 # Vidas
 vidas = 3
 
-# Posiciones iniciales
-pos_inicial_jugador = [1, 1]
-pos_inicial_fantasmas = [
-    [3, 5],
-    [3, 6],
-    [2, 5]]
-
-
 # Pantalla
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Pac-Man mejorado")
 clock = pygame.time.Clock()
 
-# Mapa
+# Mapa MÁS DIFÍCIL
 mapa = [
     "##########",
-    "#P.......#",
-    "#.####...#",
-    "#....X...#",
+    "#P..#....#",
+    "#.#.#.##.#",
+    "#.#...#..#",
+    "#.###.#..#",
+    "#.....#..#",
+    "###.###..#",
+    "#........#",
     "##########"
 ]
 
-# Posiciones iniciales
+# Jugador
 jugador = [1, 1]
-fantasma = [3, 5]
+
+# VARIOS fantasmas
+fantasmas = [
+    [4, 7],
+    [2, 5],
+    [6, 3]
+]
 
 # Puntos
 puntos = {(i, j) for i, fila in enumerate(mapa) for j, col in enumerate(fila) if col == "."}
@@ -63,33 +65,32 @@ def mover_jugador(dx, dy):
         puntos.discard((nx, ny))
 
 
-def mover_fantasma():
-    """Fantasma intenta acercarse al jugador"""
-    opciones = [(-1,0),(1,0),(0,-1),(0,1)]
+def mover_fantasmas():
+    for fantasma in fantasmas:
+        opciones = [(-1,0),(1,0),(0,-1),(0,1)]
 
-    mejor_mov = None
-    mejor_dist = float("inf")
+        mejor_mov = None
+        mejor_dist = float("inf")
 
-    for dx, dy in opciones:
-        nx, ny = fantasma[0] + dx, fantasma[1] + dy
-
-        if es_valido(nx, ny):
-            dist = abs(nx - jugador[0]) + abs(ny - jugador[1])
-            if dist < mejor_dist:
-                mejor_dist = dist
-                mejor_mov = (nx, ny)
-
-    # A veces se mueve random para no ser perfecto
-    if random.random() < 0.3:
-        random.shuffle(opciones)
         for dx, dy in opciones:
             nx, ny = fantasma[0] + dx, fantasma[1] + dy
-            if es_valido(nx, ny):
-                fantasma[0], fantasma[1] = nx, ny
-                return
 
-    if mejor_mov:
-        fantasma[0], fantasma[1] = mejor_mov
+            if es_valido(nx, ny):
+                dist = abs(nx - jugador[0]) + abs(ny - jugador[1])
+                if dist < mejor_dist:
+                    mejor_dist = dist
+                    mejor_mov = (nx, ny)
+
+        # Movimiento aleatorio a veces
+        if random.random() < 0.3:
+            random.shuffle(opciones)
+            for dx, dy in opciones:
+                nx, ny = fantasma[0] + dx, fantasma[1] + dy
+                if es_valido(nx, ny):
+                    fantasma[0], fantasma[1] = nx, ny
+                    break
+        elif mejor_mov:
+            fantasma[0], fantasma[1] = mejor_mov
 
 
 def dibujar():
@@ -118,13 +119,14 @@ def dibujar():
         15
     )
 
-    # Fantasma
-    pygame.draw.circle(
-        pantalla, ROJO,
-        (fantasma[1]*TAM_CELDA + TAM_CELDA//2,
-         fantasma[0]*TAM_CELDA + TAM_CELDA//2),
-        15
-    )
+    # Fantasmas
+    for fantasma in fantasmas:
+        pygame.draw.circle(
+            pantalla, ROJO,
+            (fantasma[1]*TAM_CELDA + TAM_CELDA//2,
+             fantasma[0]*TAM_CELDA + TAM_CELDA//2),
+            15
+        )
 
     pygame.display.flip()
 
@@ -147,13 +149,14 @@ while True:
             elif evento.key == pygame.K_d:
                 mover_jugador(0, 1)
 
-    mover_fantasma()
+    mover_fantasmas()
 
-    # Colisión
-    if jugador == fantasma:
-        print("¡Game Over!")
-        pygame.quit()
-        sys.exit()
+    # Colisión con cualquier fantasma
+    for fantasma in fantasmas:
+        if jugador == fantasma:
+            print("¡Game Over!")
+            pygame.quit()
+            sys.exit()
 
     dibujar()
     clock.tick(FPS)
